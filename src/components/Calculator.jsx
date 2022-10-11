@@ -37,19 +37,24 @@ function Calculator() {
                 setCalc(initialState);
                 break;
             case "+-":
-                //'invert'
+                // invert
+                setCalc({
+                    ...calc,
+                    sign: "",
+                    number: calc.number ? calc.number * -1 : 0,
+                    result: calc.result ? calc.result * -1 : 0,
+                });
                 break;
             case "=":
-                //'equals'
+                // equals
                 if (calc.sign && calc.number) {
-
                     setCalc({
                         ...calc,
                         sign: "",
                         number: 0,
                         result:
-                            calc.num === "0" && calc.sign === "/"
-                                ? "Can't divide with 0"
+                            calc.number === "0" && calc.sign === "/"
+                                ? "Diviser par 0 est completement illégal !!!"
                                 :
                                 calcul(
                                     Number(calc.result),
@@ -64,26 +69,33 @@ function Calculator() {
             case "X":
             case "-":
             case "+":
-                //'sign'
+                // sign
                 setCalc({
                     ...calc,
                     sign: action.value,
-                    number: calc.result,
-                    result: 0,
+                    number: 0,
+                    result: !calc.result && calc.number ? calc.number : calc.result,
                 });
                 break;
             case ".":
                 //'comma'
                 setCalc({
-                    ...state,
+                    ...calc,
                     number: !calc.number.toString().includes(".") ? calc.number + action.value : calc.number,
                 });
+                console.log(calc)
+
                 break;
             default:
                 setCalc({
                     ...calc,
-                    result: calc.result === 0 ? action.value : calc.result + action.value
+                    number: calc.number === 0 && action.value === "0"
+                        ? "0"
+                        : Number(calc.number + action.value),
+                    result: !calc.sign ? 0 : calc.result,
                 });
+                console.log(calc)
+
                 break;
         }
     }
@@ -108,7 +120,7 @@ function Calculator() {
             <div>
                 <div>
                     <h1>Calculator</h1>
-                    <p>{calc.result}</p>
+                    <p>{calc.number ? calc.number : calc.result}</p>
                 </div>
             </div>
 
