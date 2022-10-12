@@ -1,104 +1,96 @@
 import { useReducer, useState, useEffect } from "react";
 import Button from './Button';
+// import ButtonsContainer from './ButtonsContainer';
+import Screen from './Screen';
+import { CalculatorStyle } from "../styles/Calculator.style";
+import { ButtonsContainer } from "../styles/ButtonsContainer.style";
+
+
+const initialState = {
+    sign: "",
+    number: 0,
+    result: 0
+}
+
+const calcul = (a, b, sign) => {
+    switch (sign) {
+        case "+":
+            return a + b;
+        case "-":
+            return b - a;
+        case "X":
+            return a * b;
+        case "/":
+            return b / a;
+        case "%":
+            return b % a;
+    }
+}
+
+const reducer = (state, action) => {
+
+    switch (action.value) {
+        case "C":
+            return { ...initialState };
+        case "+-":
+            // invert
+            return {
+                ...state,
+                sign: "",
+                number: state.number ? state.number * -1 : 0,
+                result: state.result ? state.result * -1 : 0,
+            }
+        case "=":
+            // equals
+            if (state.sign && state.number) {
+                return {
+                    ...state,
+                    sign: "",
+                    number: 0,
+                    result:
+                        state.number === "0" && state.sign === "/"
+                            ? "Diviser par 0 est completement illégal !!!"
+                            :
+                            calcul(
+                                Number(state.number),
+                                Number(state.result),
+                                state.sign
+                            ),
+                };
+            }
+            break;
+        case "%":
+        case "/":
+        case "X":
+        case "-":
+        case "+":
+            // sign
+            return {
+                ...state,
+                sign: action.value,
+                number: 0,
+                result: !state.result && state.number ? state.number : state.result,
+            };
+        case ".":
+            // comma
+            return {
+                ...state,
+                number: !state.number.toString().includes(".") ? state.number + action.value : state.number,
+            };
+
+        default:
+            return {
+                ...state,
+                number: state.number === 0 && action.value === "0"
+                    ? "0"
+                    : Number(state.number + action.value),
+                result: !state.sign ? 0 : state.result,
+            };
+
+    }
+}
 
 function Calculator() {
-
-    const initialState = {
-        sign: "",
-        number: 0,
-        result: 0
-    }
-
-    const [calc, setCalc] = useState({
-        sign: "",
-        number: 0,
-        result: 0
-    });
-
-    const calcul = (a, b, sign) => {
-        switch (sign) {
-            case "+":
-                return a + b;
-            case "-":
-                return b - a;
-            case "X":
-                return a * b;
-            case "/":
-                return b / a;
-            case "%":
-                return b % a;
-        }
-    }
-
-    const reducer = (state, action) => {
-
-        switch (action.value) {
-            case "C":
-                setCalc(initialState);
-                break;
-            case "+-":
-                // invert
-                setCalc({
-                    ...calc,
-                    sign: "",
-                    number: calc.number ? calc.number * -1 : 0,
-                    result: calc.result ? calc.result * -1 : 0,
-                });
-                break;
-            case "=":
-                // equals
-                if (calc.sign && calc.number) {
-                    setCalc({
-                        ...calc,
-                        sign: "",
-                        number: 0,
-                        result:
-                            calc.number === "0" && calc.sign === "/"
-                                ? "Diviser par 0 est completement illégal !!!"
-                                :
-                                calcul(
-                                    Number(calc.result),
-                                    Number(calc.number),
-                                    calc.sign
-                                ),
-                    });
-                }
-                break;
-            case "%":
-            case "/":
-            case "X":
-            case "-":
-            case "+":
-                // sign
-                setCalc({
-                    ...calc,
-                    sign: action.value,
-                    number: 0,
-                    result: !calc.result && calc.number ? calc.number : calc.result,
-                });
-                break;
-            case ".":
-                //'comma'
-                setCalc({
-                    ...calc,
-                    number: !calc.number.toString().includes(".") ? calc.number + action.value : calc.number,
-                });
-                console.log(calc)
-
-                break;
-            default:
-                setCalc({
-                    ...calc,
-                    number: calc.number === 0 && action.value === "0"
-                        ? "0"
-                        : Number(calc.number + action.value),
-                    result: !calc.sign ? 0 : calc.result,
-                });
-                console.log(calc)
-
-                break;
-        }
-    }
 
     const [state, dispatch] = useReducer(reducer, initialState);
 
@@ -116,24 +108,21 @@ function Calculator() {
     }
 
     return (
-        <div>
+        <CalculatorStyle>
             <div>
-                <div>
-                    <h1>Calculator</h1>
-                    <p>{calc.number ? calc.number : calc.result}</p>
-                </div>
+                <Screen value={state.number ? state.number : state.result}></Screen>
             </div>
 
-            <div>
+            <ButtonsContainer>
                 {btnValues.map((row, key) => (
-                    <div key={key}>
+                    <div className="row" key={key}>
                         {row.map((value, index) => (
                             <Button key={index} value={value} onClick={handleClick} />
                         ))}
                     </div>
                 ))}
-            </div>
-        </div>
+            </ButtonsContainer>
+        </CalculatorStyle>
     );
 }
 
